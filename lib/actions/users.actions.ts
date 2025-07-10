@@ -1,0 +1,96 @@
+// Design pattern
+// User enters full name and email
+// Check if user already exists using email
+// Send otp to user's email
+// This will send a secret key for creating a session.
+// create a new user document if the user is a new user
+// return the users account id athat will be used to complete the logic
+// verify the otp and authenticate to login
+
+"use server";
+
+import { Query, ID } from "node-appwrite";
+import { createAdminClient } from "../appwrite";
+import { appwriteConfig } from "../appwrite/config";
+import { parseStringify } from "../utils";
+import { cookies } from "next/headers";
+
+const getUserByEmail = async (email: string) => {
+  const { databases } = await createAdminClient();
+  const result = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.usersCollectionId,
+    [Query.equal("email", [email])]
+  );
+  return result.total > 0 ? result.documents[0] : null;
+};
+
+const handleError = (error: unknown, message: string) => {
+  console.log(error, message);
+  throw error;
+};
+
+export const sendEmailOTP = async ({ email }: { email: string }) => {
+  const { account } = await createAdminClient();
+  try {
+    const session = await account.createEmailToken(ID.unique(), email);
+    return session.userId;
+  } catch (e) {
+    handleError(e, "Failed to send Email OTP");
+  }
+};
+
+export const createAccount = async ({
+  fullName,
+  email,
+}: {
+  fullName: string;
+  email: string;
+}) => {
+  const existingUser = await getUserByEmail(email);
+  const accountId = await sendEmailOTP({ email });
+
+  if (!accountId) {
+    throw new Error("Failed to send an OTP");
+  }
+
+  if (!existingUser) {
+    const { databases } = await createAdminClient();
+    await databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      ID.unique(),
+      {
+        fullName,
+        email,
+        avatar:
+          "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fvectors%2Favatar-icon-placeholder-facebook-1577909%2F&psig=AOvVaw3S6LYUqTCVmyH8SXOyStQW&ust=1752179744912000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMipiazQsI4DFQAAAAAdAAAAABAE",
+        accountId,
+      }
+    );
+  }
+  return parseStringify({ accountId });
+};
+
+export const verifySecret = async ({
+  accountId,
+  password,
+}: {
+  accountId: string;
+  password: string;
+}) => {
+  const { account } = await createAdminClient();
+  const session = await account.createSession(accountId, password);
+
+  try {
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+    return parseStringify({ sessionId: session.$id });
+  } catch (e) {
+    handleError(e, "Failed to verify-otp");
+  }
+};
