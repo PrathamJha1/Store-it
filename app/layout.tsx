@@ -16,7 +16,7 @@ import React from "react";
 // });
 
 export const metadata: Metadata = {
-  title: "SaveDrive",
+  title: "Store-It",
   description: "The newest Solution to storing problems",
 };
 
