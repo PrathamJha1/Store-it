@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 const Header = () => {
   const router = useRouter();
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSignout = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
       await signOutUser();
@@ -28,7 +28,7 @@ const Header = () => {
           <Button
             type="submit"
             className="sign-out-button"
-            onClick={handleSubmit}
+            onClick={handleSignout}
           >
             <Image
               src="/assets/icons/logout.svg"
