@@ -6,7 +6,13 @@ import Search from "@/components/Search";
 import FileUploader from "@/components/FileUploader";
 import { signOutUser } from "@/lib/actions/users.actions";
 import { useRouter } from "next/navigation";
-const Header = () => {
+const Header = ({
+  userId,
+  accountId,
+}: {
+  userId: string;
+  accountId: string;
+}) => {
   const router = useRouter();
 
   const handleSignout = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -23,7 +29,11 @@ const Header = () => {
     <header className="header">
       <Search />
       <div className="header-wrapper">
-        <FileUploader />
+        <FileUploader
+          ownerId={userId}
+          accountId={accountId}
+          className={undefined}
+        />
         <form>
           <Button
             type="submit"
