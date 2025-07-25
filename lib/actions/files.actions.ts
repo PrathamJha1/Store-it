@@ -114,3 +114,14 @@ export const renameFile = async ({
     handleError(error, "Failed to rename file !");
   }
 };
+
+export const deleteFile = async ({
+  fileId,
+  path,
+}: {
+  fileId: string;
+  path: string;
+}) => {
+  const { databases } = await createAdminClient();
+  // Todo create a delete file function
+};
