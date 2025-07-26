@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Models } from "node-appwrite";
 import React from "react";

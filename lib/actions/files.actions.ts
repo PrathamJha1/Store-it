@@ -1,5 +1,10 @@
 "use server";
-import { RenameFileProps, UploadFileProps } from "@/types";
+import {
+  DeleteFileProps,
+  RenameFileProps,
+  UpdateFileUsersProps,
+  UploadFileProps,
+} from "@/types";
 import { createAdminClient } from "../appwrite";
 import {
   handleError,
@@ -117,11 +122,44 @@ export const renameFile = async ({
 
 export const deleteFile = async ({
   fileId,
+  bucketFileId,
   path,
-}: {
-  fileId: string;
-  path: string;
-}) => {
+}: DeleteFileProps) => {
+  const { databases, storage } = await createAdminClient();
+  try {
+    const deletedFile = await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      fileId
+    );
+    if (deletedFile) {
+      await storage.deleteFile(appwriteConfig.bucketId, bucketFileId);
+    }
+    revalidatePath(path);
+    return parseStringify(deletedFile);
+  } catch (error) {
+    handleError(error, "Failed to rename file !");
+  }
+};
+
+export const updateFileUsers = async ({
+  fileId,
+  emails,
+  path,
+}: UpdateFileUsersProps) => {
   const { databases } = await createAdminClient();
-  // Todo create a delete file function
+  try {
+    const updateFile = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollectionId,
+      fileId,
+      {
+        users: emails,
+      }
+    );
+    revalidatePath(path);
+    return parseStringify(updateFile);
+  } catch (error) {
+    handleError(error, "Failed to rename file !");
+  }
 };

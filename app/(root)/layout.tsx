@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { Toaster } from "@/components/ui/toaster";
 const Layout = async ({ children }: { children: React.ReactNode }) => {
   const currentUser = await getCurrentUser();
+  console.log(currentUser);
   if (!currentUser) redirect("/sign-in");
 
   return (
