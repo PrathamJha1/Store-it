@@ -31,7 +31,7 @@
     "react-hook-form": "^7.60.0",
     "recharts": "^2.13.3",
     "tailwind-merge": "^2.6.0",
-    "use-debounce": "^10.0.4",
+    "use-debounce": "^10.0.5",
     "zod": "^3.25.74"
   },
   "overrides": {
