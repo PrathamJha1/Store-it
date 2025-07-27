@@ -1,16 +1,13 @@
+import { FileType } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { FileType } from "../types";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 export const parseStringify = (value: unknown) =>
   JSON.parse(JSON.stringify(value));
 
-export const handleError = (error: unknown, message: string) => {
-  console.log(error, message);
-  throw error;
-};
 export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
 
 export const convertFileSize = (sizeInBytes: number, digits?: number) => {
