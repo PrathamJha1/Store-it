@@ -1,9 +1,13 @@
 import React from "react";
 import Sort from "@/components/Sort";
-import { getFiles } from "@/lib/actions/files.actions";
+import { getFiles, getTotalSpaceUsed } from "@/lib/actions/files.actions";
 import { Models } from "node-appwrite";
 import Card from "@/components/Card";
-import { getFileTypesParams } from "@/lib/utils";
+import {
+  convertFileSize,
+  getFileTypesParams,
+  getUsageSummary,
+} from "@/lib/utils";
 import { SearchParamProps, FileType } from "@/types";
 
 const Page = async ({ searchParams, params }: SearchParamProps) => {
@@ -14,6 +18,26 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
   const types = getFileTypesParams(type) as FileType[];
 
   const files = await getFiles({ types, searchText, sort });
+  const totalSpaceData = await getTotalSpaceUsed();
+  const usageSummary = getUsageSummary(totalSpaceData);
+
+  // Find the size for the current type
+  const currentTypeTitle = type.charAt(0).toUpperCase() + type.slice(1); // Capitalize first letter
+  // Handle "media" type which combines video and audio
+  let currentTypeSummary;
+  if (currentTypeTitle === "Media") {
+    currentTypeSummary = usageSummary.find(
+      (summary) => summary.title === "Media"
+    );
+  } else {
+    currentTypeSummary = usageSummary.find(
+      (summary) => summary.title === currentTypeTitle
+    );
+  }
+
+  const totalSizeForType = currentTypeSummary
+    ? convertFileSize(currentTypeSummary.size)
+    : "0 MB";
 
   return (
     <div className="page-container">
@@ -22,7 +46,7 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
 
         <div className="total-size-section">
           <p className="body-1">
-            Total: <span className="h5">0 MB</span>
+            Total: <span className="h5">{totalSizeForType}</span>
           </p>
 
           <div className="sort-container">
